@@ -90,9 +90,11 @@ class pix2pix(object):
 
         self.d_loss_real = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=self.D_logits, labels=tf.ones_like(self.D)))
         self.d_loss_fake = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=self.D_logits_, labels=tf.zeros_like(self.D_)))
+        self.mask = tf.greater(tf.abs(self.real_B - self.fake_B), 0) # only calculate the mean of different part
         self.g_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=self.D_logits_, labels=tf.ones_like(self.D_))) \
-                        + self.L1_lambda * tf.reduce_mean(tf.abs(self.real_B - self.fake_B))\
-                        + self.L1_lambda * 2 * tf.abs(tf.reduce_mean(self.real_B) - tf.reduce_mean(tf.abs(self.real_B - self.fake_B)))
+                        + self.L1_lambda * tf.reduce_mean(tf.boolean_mask(self.fake_B, self.mask))
+                        #+ self.L1_lambda * tf.reduce_mean(tf.abs(self.real_B - self.fake_B))\
+                        #+ self.L1_lambda * 2 * tf.abs(tf.reduce_mean(self.real_B) - tf.reduce_mean(tf.abs(self.real_B - self.fake_B)))
 
         self.d_loss_real_sum = tf.summary.scalar("d_loss_real", self.d_loss_real)
         self.d_loss_fake_sum = tf.summary.scalar("d_loss_fake", self.d_loss_fake)
