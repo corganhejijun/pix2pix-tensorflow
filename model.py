@@ -398,8 +398,8 @@ class pix2pix(object):
         sample_files = glob('./datasets/{}/val/*.jpg'.format(self.dataset_name))
 
         # sort testing input
-        n = [int(i) for i in map(lambda x: x.split('/')[-1].split('.jpg')[0], sample_files)]
-        sample_files = [x for (y, x) in sorted(zip(n, sample_files))]
+        # n = [int(i) for i in map(lambda x: x.split('/')[-1].split('.jpg')[0], sample_files)]
+        # sample_files = [x for (y, x) in sorted(zip(n, sample_files))]
 
         # load testing input
         print("Loading testing images ...")
@@ -420,13 +420,15 @@ class pix2pix(object):
             print(" [*] Load SUCCESS")
         else:
             print(" [!] Load failed...")
+        print("file number: {}".format(len(sample_files)))
 
         for i, sample_image in enumerate(sample_images):
-            idx = i+1
-            print("sampling image ", idx)
+            idx = i
+            fileName = sample_files[idx].split('/')[-1].split('.jpg')[0]
+            print("sampling image {}, {} of total {}".format(fileName, idx, len(sample_files)))
             samples = self.sess.run(
                 self.fake_B_sample,
                 feed_dict={self.real_data: sample_image}
             )
             save_images(samples, [self.batch_size, 1],
-                        './{}/test_{:04d}.png'.format(args.test_dir, idx))
+                        './{}/{}.png'.format(args.test_dir, fileName))
